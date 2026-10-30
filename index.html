@@ -1,0 +1,91 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fairness Lab</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  padding: 25px;
+  background: #101820;
+  color: white;
+  font-family: Arial, sans-serif;
+}
+.container {
+  max-width: 500px;
+  margin: 35px auto;
+  padding: 25px;
+  background: #1c2935;
+  border-radius: 16px;
+}
+h1 { color: #38d996; }
+p { color: #b8c5d1; }
+input {
+  width: 100%;
+  padding: 14px;
+  margin: 10px 0;
+  background: #101820;
+  color: white;
+  border: 1px solid #526170;
+  border-radius: 8px;
+}
+button {
+  width: 100%;
+  padding: 14px;
+  background: #159968;
+  color: white;
+  border: 0;
+  border-radius: 8px;
+  font-weight: bold;
+}
+#result {
+  margin-top: 20px;
+  overflow-wrap: anywhere;
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Fairness Lab</h1>
+  <p>SHA-256 Commitment Verification</p>
+
+  <label>Revealed Server Seed</label>
+  <input id="seed" placeholder="Enter revealed server seed">
+
+  <label>Original Server Seed Hash</label>
+  <input id="hash" placeholder="Enter 64-character hash">
+
+  <button onclick="verify()">Verify Fairness</button>
+
+  <div id="result"></div>
+</div>
+
+<script>
+async function verify() {
+  const seed = document.getElementById("seed").value;
+  const expected = document.getElementById("hash").value
+    .trim().toLowerCase();
+  const result = document.getElementById("result");
+
+  if (!seed || !/^[a-f0-9]{64}$/.test(expected)) {
+    result.textContent = "Please enter a seed and valid SHA-256 hash.";
+    return;
+  }
+
+  const data = new TextEncoder().encode(seed);
+  const digest = await crypto.subtle.digest("SHA-256", data);
+
+  const actual = Array.from(new Uint8Array(digest))
+    .map(b => b.toString(16).padStart(2, "0"))
+    .join("");
+
+  result.textContent = actual === expected
+    ? "VERIFIED: Hash matches."
+    : "NOT VERIFIED: Hash does not match.";
+}
+</script>
+</body>
+</html>
