@@ -4,88 +4,309 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fairness Lab</title>
+<title>Mines Fairness Lab</title>
+
 <style>
 * { box-sizing: border-box; }
+
 body {
   margin: 0;
-  padding: 25px;
-  background: #101820;
+  padding: 18px;
+  background: #07110d;
   color: white;
   font-family: Arial, sans-serif;
 }
+
 .container {
-  max-width: 500px;
-  margin: 35px auto;
-  padding: 25px;
-  background: #1c2935;
-  border-radius: 16px;
+  max-width: 650px;
+  margin: 15px auto;
 }
-h1 { color: #38d996; }
-p { color: #b8c5d1; }
+
+.header {
+  text-align: center;
+  color: #36f59a;
+  margin-bottom: 22px;
+}
+
+.header h1 {
+  font-size: 25px;
+  margin-bottom: 6px;
+}
+
+.subtitle {
+  color: #86a997;
+  font-size: 12px;
+  letter-spacing: 2px;
+}
+
+.panel {
+  background: #102019;
+  border: 1px solid #244735;
+  border-radius: 14px;
+  padding: 17px;
+  margin-bottom: 15px;
+}
+
+h3 {
+  color: #39e995;
+  margin-top: 0;
+}
+
+label {
+  display: block;
+  margin: 12px 0 6px;
+  color: #b5cbbd;
+  font-size: 13px;
+}
+
 input {
   width: 100%;
-  padding: 14px;
-  margin: 10px 0;
-  background: #101820;
-  color: white;
-  border: 1px solid #526170;
+  padding: 13px;
   border-radius: 8px;
+  border: 1px solid #315640;
+  background: #08140e;
+  color: white;
+  outline: none;
 }
+
+input:focus {
+  border-color: #36f59a;
+}
+
+.buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
 button {
-  width: 100%;
-  padding: 14px;
-  background: #159968;
-  color: white;
-  border: 0;
+  cursor: pointer;
+  border: none;
   border-radius: 8px;
+  padding: 13px 8px;
+  color: white;
   font-weight: bold;
+  flex: 1;
 }
-#result {
-  margin-top: 20px;
+
+.verify {
+  background: #07864e;
+}
+
+.reset {
+  background: #a62c43;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 9px;
+}
+
+.cell {
+  aspect-ratio: 1;
+  border-radius: 9px;
+  background: #193d2a;
+  border: 1px solid #28583b;
+  color: #51a875;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.cell.active {
+  background: #087c4d;
+  border-color: #4affaa;
+  color: white;
+  box-shadow: 0 0 10px #087c4d;
+}
+
+.status {
+  padding: 14px;
+  border-radius: 9px;
+  background: #08140e;
+  color: #9bbda8;
   overflow-wrap: anywhere;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.stats {
+  display: flex;
+  justify-content: space-between;
+  color: #a6c5b2;
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+
+.footer {
+  text-align: center;
+  color: #668c76;
+  font-size: 11px;
+  margin-top: 20px;
 }
 </style>
 </head>
+
 <body>
 <div class="container">
-  <h1>Fairness Lab</h1>
-  <p>SHA-256 Commitment Verification</p>
 
-  <label>Revealed Server Seed</label>
-  <input id="seed" placeholder="Enter revealed server seed">
+  <div class="header">
+    <h1>✦ MINES FAIRNESS LAB</h1>
+    <div class="subtitle">PROVABLY FAIR VERIFICATION</div>
+  </div>
 
-  <label>Original Server Seed Hash</label>
-  <input id="hash" placeholder="Enter 64-character hash">
+  <div class="panel">
+    <h3>FAIRNESS DATA</h3>
 
-  <button onclick="verify()">Verify Fairness</button>
+    <label>Server Seed Hash</label>
+    <input id="hash" placeholder="Enter 64-character SHA-256 hash">
 
-  <div id="result"></div>
+    <label>Revealed Server Seed</label>
+    <input id="seed" placeholder="Enter revealed server seed">
+
+    <label>Client Seed (optional)</label>
+    <input id="client" placeholder="Enter client seed">
+
+    <label>Nonce (optional)</label>
+    <input id="nonce" type="number" min="0" placeholder="0">
+
+    <div class="buttons">
+      <button class="verify" onclick="verifyHash()">
+        VERIFY HASH
+      </button>
+
+      <button class="reset" onclick="resetAll()">
+        RESET
+      </button>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h3>5 × 5 DEMONSTRATION GRID</h3>
+
+    <div class="stats">
+      <span>Selected Cells</span>
+      <span id="count">0 / 25</span>
+    </div>
+
+    <div class="grid" id="grid"></div>
+
+    <p style="color:#83a893;font-size:12px">
+      Tap a cell to select or deselect it.
+      This is an interactive visual demonstration,
+      not a prediction of game outcomes.
+    </p>
+  </div>
+
+  <div class="panel">
+    <h3>VERIFICATION STATUS</h3>
+    <div class="status" id="status">
+      Waiting for fairness data...
+    </div>
+  </div>
+
+  <div class="footer">
+    MINES FAIRNESS LAB • EDUCATIONAL DEMONSTRATION
+  </div>
+
 </div>
 
 <script>
-async function verify() {
-  const seed = document.getElementById("seed").value;
-  const expected = document.getElementById("hash").value
-    .trim().toLowerCase();
-  const result = document.getElementById("result");
+const grid = document.getElementById("grid");
+const count = document.getElementById("count");
+const statusBox = document.getElementById("status");
 
-  if (!seed || !/^[a-f0-9]{64}$/.test(expected)) {
-    result.textContent = "Please enter a seed and valid SHA-256 hash.";
+let selected = new Set();
+
+function createGrid() {
+  grid.innerHTML = "";
+
+  for (let i = 0; i < 25; i++) {
+    const cell = document.createElement("button");
+
+    cell.className = "cell";
+    cell.type = "button";
+    cell.textContent = "◆";
+    cell.setAttribute("aria-label", "Cell " + (i + 1));
+
+    cell.onclick = () => {
+      if (selected.has(i)) {
+        selected.delete(i);
+        cell.classList.remove("active");
+      } else {
+        selected.add(i);
+        cell.classList.add("active");
+      }
+
+      updateCount();
+    };
+
+    grid.appendChild(cell);
+  }
+}
+
+function updateCount() {
+  count.textContent = selected.size + " / 25";
+}
+
+async function verifyHash() {
+  const seed = document.getElementById("seed").value;
+  const expected = document.getElementById("hash")
+    .value.trim().toLowerCase();
+
+  if (!seed) {
+    statusBox.textContent = "Please enter revealed server seed.";
     return;
   }
 
-  const data = new TextEncoder().encode(seed);
-  const digest = await crypto.subtle.digest("SHA-256", data);
+  if (!/^[a-f0-9]{64}$/.test(expected)) {
+    statusBox.textContent = "Invalid SHA-256 hash format.";
+    return;
+  }
 
-  const actual = Array.from(new Uint8Array(digest))
-    .map(b => b.toString(16).padStart(2, "0"))
-    .join("");
+  if (!window.crypto || !crypto.subtle) {
+    statusBox.textContent =
+      "Secure browser context required for SHA-256.";
+    return;
+  }
 
-  result.textContent = actual === expected
-    ? "VERIFIED: Hash matches."
-    : "NOT VERIFIED: Hash does not match.";
+  try {
+    statusBox.textContent = "Verifying SHA-256...";
+
+    const bytes = new TextEncoder().encode(seed);
+    const digest = await crypto.subtle.digest("SHA-256", bytes);
+
+    const actual = Array.from(new Uint8Array(digest))
+      .map(b => b.toString(16).padStart(2, "0"))
+      .join("");
+
+    if (actual === expected) {
+      statusBox.textContent =
+        "VERIFIED: SHA-256 hash matches the revealed server seed.";
+    } else {
+      statusBox.textContent =
+        "NOT VERIFIED: SHA-256 hash does not match.";
+    }
+
+  } catch (error) {
+    statusBox.textContent = "Verification error.";
+  }
 }
+
+function resetAll() {
+  document.getElementById("hash").value = "";
+  document.getElementById("seed").value = "";
+  document.getElementById("client").value = "";
+  document.getElementById("nonce").value = "";
+
+  selected.clear();
+  updateCount();
+  createGrid();
+
+  statusBox.textContent = "Waiting for fairness data...";
+}
+
+createGrid();
 </script>
 </body>
 </html>
