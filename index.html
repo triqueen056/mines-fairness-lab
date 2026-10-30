@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mines Fairness Lab</title>
+<title>Mines Fairness Lab v2</title>
 
 <style>
 * { box-sizing: border-box; }
@@ -17,10 +17,7 @@ body {
   font-family: Arial, sans-serif;
 }
 
-.container {
-  max-width: 650px;
-  margin: 15px auto;
-}
+.container { max-width: 650px; margin: 15px auto; }
 
 .header {
   text-align: center;
@@ -28,10 +25,7 @@ body {
   margin-bottom: 22px;
 }
 
-.header h1 {
-  font-size: 25px;
-  margin-bottom: 6px;
-}
+.header h1 { font-size: 25px; margin-bottom: 6px; }
 
 .subtitle {
   color: #86a997;
@@ -47,10 +41,7 @@ body {
   margin-bottom: 15px;
 }
 
-h3 {
-  color: #39e995;
-  margin-top: 0;
-}
+h3 { color: #39e995; margin-top: 0; }
 
 label {
   display: block;
@@ -69,15 +60,9 @@ input {
   outline: none;
 }
 
-input:focus {
-  border-color: #36f59a;
-}
+input:focus { border-color: #36f59a; }
 
-.buttons {
-  display: flex;
-  gap: 10px;
-  margin-top: 15px;
-}
+.buttons { display: flex; gap: 10px; margin-top: 15px; }
 
 button {
   cursor: pointer;
@@ -89,13 +74,8 @@ button {
   flex: 1;
 }
 
-.verify {
-  background: #07864e;
-}
-
-.reset {
-  background: #a62c43;
-}
+.verify, .copy { background: #07864e; }
+.reset { background: #a62c43; }
 
 .grid {
   display: grid;
@@ -110,7 +90,6 @@ button {
   border: 1px solid #28583b;
   color: #51a875;
   font-size: 22px;
-  cursor: pointer;
 }
 
 .cell.active {
@@ -127,6 +106,24 @@ button {
   color: #9bbda8;
   overflow-wrap: anywhere;
   font-size: 13px;
+  line-height: 1.6;
+}
+
+.result-hash {
+  font-size: 12px;
+  color: #a6c5b2;
+  overflow-wrap: anywhere;
+  line-height: 1.6;
+  margin-top: 10px;
+}
+
+.history-item {
+  padding: 10px;
+  margin-top: 8px;
+  border-radius: 8px;
+  background: #08140e;
+  font-size: 12px;
+  overflow-wrap: anywhere;
   line-height: 1.6;
 }
 
@@ -152,14 +149,14 @@ button {
 
   <div class="header">
     <h1>✦ MINES FAIRNESS LAB</h1>
-    <div class="subtitle">PROVABLY FAIR VERIFICATION</div>
+    <div class="subtitle">PROVABLY FAIR VERIFICATION • V2</div>
   </div>
 
   <div class="panel">
     <h3>FAIRNESS DATA</h3>
 
     <label>Server Seed Hash</label>
-    <input id="hash" placeholder="Enter 64-character SHA-256 hash">
+    <input id="hash" placeholder="64-character SHA-256 hash">
 
     <label>Revealed Server Seed</label>
     <input id="seed" placeholder="Enter revealed server seed">
@@ -171,14 +168,32 @@ button {
     <input id="nonce" type="number" min="0" placeholder="0">
 
     <div class="buttons">
-      <button class="verify" onclick="verifyHash()">
+      <button class="verify" id="verifyButton" onclick="verifyHash()">
         VERIFY HASH
       </button>
-
-      <button class="reset" onclick="resetAll()">
-        RESET
-      </button>
+      <button class="reset" onclick="resetAll()">RESET</button>
     </div>
+  </div>
+
+  <div class="panel">
+    <h3>VERIFICATION STATUS</h3>
+    <div class="status" id="status">
+      Waiting for fairness data...
+    </div>
+
+    <div class="result-hash">
+      <strong>Calculated SHA-256:</strong>
+      <div id="calculated">Not calculated yet.</div>
+    </div>
+
+    <button class="copy" onclick="copyHash()" style="width:100%;margin-top:12px">
+      COPY CALCULATED HASH
+    </button>
+  </div>
+
+  <div class="panel">
+    <h3>VERIFICATION HISTORY</h3>
+    <div id="history">No verification history yet.</div>
   </div>
 
   <div class="panel">
@@ -192,38 +207,32 @@ button {
     <div class="grid" id="grid"></div>
 
     <p style="color:#83a893;font-size:12px">
-      Tap a cell to select or deselect it.
-      This is an interactive visual demonstration,
-      not a prediction of game outcomes.
+      Interactive visual demonstration only.
+      This grid does not predict game outcomes.
     </p>
-  </div>
-
-  <div class="panel">
-    <h3>VERIFICATION STATUS</h3>
-    <div class="status" id="status">
-      Waiting for fairness data...
-    </div>
   </div>
 
   <div class="footer">
     MINES FAIRNESS LAB • EDUCATIONAL DEMONSTRATION
   </div>
-
 </div>
 
 <script>
 const grid = document.getElementById("grid");
 const count = document.getElementById("count");
 const statusBox = document.getElementById("status");
+const calculated = document.getElementById("calculated");
+const historyBox = document.getElementById("history");
 
 let selected = new Set();
+let history = [];
+let lastCalculatedHash = "";
 
 function createGrid() {
   grid.innerHTML = "";
 
   for (let i = 0; i < 25; i++) {
     const cell = document.createElement("button");
-
     cell.className = "cell";
     cell.type = "button";
     cell.textContent = "◆";
@@ -237,7 +246,6 @@ function createGrid() {
         selected.add(i);
         cell.classList.add("active");
       }
-
       updateCount();
     };
 
@@ -249,10 +257,50 @@ function updateCount() {
   count.textContent = selected.size + " / 25";
 }
 
+function addHistory(result, hash) {
+  history.unshift({
+    result,
+    hash,
+    time: new Date().toLocaleString("id-ID")
+  });
+
+  history = history.slice(0, 10);
+  renderHistory();
+}
+
+function renderHistory() {
+  historyBox.innerHTML = "";
+
+  if (history.length === 0) {
+    historyBox.textContent = "No verification history yet.";
+    return;
+  }
+
+  history.forEach(item => {
+    const entry = document.createElement("div");
+    entry.className = "history-item";
+
+    const title = document.createElement("strong");
+    title.textContent = item.result;
+
+    const time = document.createElement("div");
+    time.textContent = item.time;
+
+    const hash = document.createElement("div");
+    hash.textContent = item.hash;
+
+    entry.append(title, time, hash);
+    historyBox.appendChild(entry);
+  });
+}
+
 async function verifyHash() {
   const seed = document.getElementById("seed").value;
   const expected = document.getElementById("hash")
     .value.trim().toLowerCase();
+
+  lastCalculatedHash = "";
+  calculated.textContent = "Not calculated yet.";
 
   if (!seed) {
     statusBox.textContent = "Please enter revealed server seed.";
@@ -260,7 +308,8 @@ async function verifyHash() {
   }
 
   if (!/^[a-f0-9]{64}$/.test(expected)) {
-    statusBox.textContent = "Invalid SHA-256 hash format.";
+    statusBox.textContent =
+      "Invalid hash format. Enter exactly 64 hexadecimal characters.";
     return;
   }
 
@@ -269,6 +318,9 @@ async function verifyHash() {
       "Secure browser context required for SHA-256.";
     return;
   }
+
+  const verifyButton = document.getElementById("verifyButton");
+  verifyButton.disabled = true;
 
   try {
     statusBox.textContent = "Verifying SHA-256...";
@@ -280,16 +332,38 @@ async function verifyHash() {
       .map(b => b.toString(16).padStart(2, "0"))
       .join("");
 
+    lastCalculatedHash = actual;
+    calculated.textContent = actual;
+
     if (actual === expected) {
       statusBox.textContent =
         "VERIFIED: SHA-256 hash matches the revealed server seed.";
+      addHistory("VERIFIED", actual);
     } else {
       statusBox.textContent =
         "NOT VERIFIED: SHA-256 hash does not match.";
+      addHistory("NOT VERIFIED", actual);
     }
 
   } catch (error) {
     statusBox.textContent = "Verification error.";
+  } finally {
+    verifyButton.disabled = false;
+  }
+}
+
+async function copyHash() {
+  if (!lastCalculatedHash) {
+    statusBox.textContent = "Calculate a hash before copying.";
+    return;
+  }
+
+  try {
+    await navigator.clipboard.writeText(lastCalculatedHash);
+    statusBox.textContent = "Calculated hash copied.";
+  } catch (error) {
+    statusBox.textContent =
+      "Copy unavailable. Please select and copy the hash manually.";
   }
 }
 
@@ -300,13 +374,19 @@ function resetAll() {
   document.getElementById("nonce").value = "";
 
   selected.clear();
+  history = [];
+  lastCalculatedHash = "";
+
   updateCount();
   createGrid();
+  renderHistory();
 
+  calculated.textContent = "Not calculated yet.";
   statusBox.textContent = "Waiting for fairness data...";
 }
 
 createGrid();
+renderHistory();
 </script>
 </body>
 </html>
