@@ -4,127 +4,129 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mines Fairness Lab v2</title>
+<meta name="theme-color" content="#07110d">
+<title>Mines Fairness Lab v3</title>
 
 <style>
 * { box-sizing: border-box; }
 
 body {
   margin: 0;
-  padding: 18px;
-  background: #07110d;
-  color: white;
+  padding: 16px;
+  background: #050907;
+  color: #fff;
   font-family: Arial, sans-serif;
 }
 
-.container { max-width: 650px; margin: 15px auto; }
+.container {
+  max-width: 650px;
+  margin: 15px auto;
+}
 
 .header {
   text-align: center;
-  color: #36f59a;
   margin-bottom: 22px;
 }
 
-.header h1 { font-size: 25px; margin-bottom: 6px; }
+.header h1 {
+  color: #39ff9a;
+  font-size: 25px;
+  margin-bottom: 7px;
+  text-shadow: 0 0 14px #07864e;
+}
 
 .subtitle {
   color: #86a997;
-  font-size: 12px;
+  font-size: 11px;
   letter-spacing: 2px;
 }
 
 .panel {
-  background: #102019;
-  border: 1px solid #244735;
+  background: #0d1912;
+  border: 1px solid #245438;
   border-radius: 14px;
   padding: 17px;
   margin-bottom: 15px;
+  box-shadow: 0 0 14px #001b0d;
 }
 
-h3 { color: #39e995; margin-top: 0; }
+h3 {
+  color: #39f59a;
+  font-size: 15px;
+  margin-top: 0;
+}
 
 label {
   display: block;
-  margin: 12px 0 6px;
+  margin: 13px 0 6px;
   color: #b5cbbd;
   font-size: 13px;
 }
 
-input {
+input, select {
   width: 100%;
-  padding: 13px;
+  padding: 12px;
   border-radius: 8px;
   border: 1px solid #315640;
-  background: #08140e;
+  background: #07110c;
   color: white;
   outline: none;
 }
 
-input:focus { border-color: #36f59a; }
+input:focus, select:focus {
+  border-color: #39ff9a;
+}
 
-.buttons { display: flex; gap: 10px; margin-top: 15px; }
+.buttons {
+  display: flex;
+  gap: 9px;
+  margin-top: 15px;
+}
 
 button {
   cursor: pointer;
   border: none;
   border-radius: 8px;
-  padding: 13px 8px;
+  padding: 12px;
   color: white;
   font-weight: bold;
+}
+
+button:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+.verify, .copy {
+  background: #07864e;
   flex: 1;
 }
 
-.verify, .copy { background: #07864e; }
-.reset { background: #a62c43; }
+.reset {
+  background: #a62c43;
+  flex: 1;
+}
 
 .grid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: 9px;
+  margin-top: 12px;
 }
 
 .cell {
   aspect-ratio: 1;
-  border-radius: 9px;
   background: #193d2a;
   border: 1px solid #28583b;
-  color: #51a875;
-  font-size: 22px;
+  border-radius: 9px;
+  font-size: 23px;
+  color: #7ebc91;
 }
 
 .cell.active {
   background: #087c4d;
   border-color: #4affaa;
-  color: white;
-  box-shadow: 0 0 10px #087c4d;
-}
-
-.status {
-  padding: 14px;
-  border-radius: 9px;
-  background: #08140e;
-  color: #9bbda8;
-  overflow-wrap: anywhere;
-  font-size: 13px;
-  line-height: 1.6;
-}
-
-.result-hash {
-  font-size: 12px;
-  color: #a6c5b2;
-  overflow-wrap: anywhere;
-  line-height: 1.6;
-  margin-top: 10px;
-}
-
-.history-item {
-  padding: 10px;
-  margin-top: 8px;
-  border-radius: 8px;
-  background: #08140e;
-  font-size: 12px;
-  overflow-wrap: anywhere;
-  line-height: 1.6;
+  box-shadow: 0 0 9px #087c4d;
 }
 
 .stats {
@@ -132,14 +134,61 @@ button {
   justify-content: space-between;
   color: #a6c5b2;
   font-size: 13px;
-  margin-bottom: 12px;
+}
+
+.status {
+  padding: 13px;
+  border-radius: 9px;
+  background: #07110c;
+  color: #b5cbbd;
+  overflow-wrap: anywhere;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.hash-output {
+  color: #a6c5b2;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+  line-height: 1.6;
+  margin-top: 12px;
+}
+
+.metric {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+  margin-top: 8px;
+  border-radius: 8px;
+  background: #07110c;
+  font-size: 13px;
+}
+
+.metric strong {
+  color: #39ff9a;
+}
+
+.history-item {
+  background: #07110c;
+  padding: 10px;
+  margin-top: 8px;
+  border-radius: 8px;
+  font-size: 12px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.note {
+  color: #86a997;
+  font-size: 11px;
+  line-height: 1.6;
 }
 
 .footer {
   text-align: center;
   color: #668c76;
   font-size: 11px;
-  margin-top: 20px;
+  margin: 22px 0;
 }
 </style>
 </head>
@@ -147,82 +196,155 @@ button {
 <body>
 <div class="container">
 
-  <div class="header">
-    <h1>✦ MINES FAIRNESS LAB</h1>
-    <div class="subtitle">PROVABLY FAIR VERIFICATION • V2</div>
+<header class="header">
+  <h1>✦ MINES FAIRNESS LAB</h1>
+  <div class="subtitle">SHA-256 • PROBABILITY • EDUCATIONAL LAB</div>
+</header>
+
+<!-- FAIRNESS DATA -->
+<section class="panel">
+  <h3>01 / FAIRNESS DATA</h3>
+
+  <label for="hash">Server Seed Hash</label>
+  <input id="hash" autocomplete="off"
+    placeholder="Enter 64-character SHA-256 hash">
+
+  <label for="seed">Revealed Server Seed</label>
+  <input id="seed" autocomplete="off"
+    placeholder="Enter revealed server seed">
+
+  <label for="client">Client Seed (optional)</label>
+  <input id="client" autocomplete="off"
+    placeholder="Enter client seed">
+
+  <label for="nonce">Nonce (optional)</label>
+  <input id="nonce" type="number" min="0" step="1"
+    placeholder="Enter nonce">
+
+  <div class="buttons">
+    <button class="verify" id="verifyButton"
+      type="button">VERIFY HASH</button>
+    <button class="reset" id="resetButton"
+      type="button">RESET</button>
+  </div>
+</section>
+
+<!-- VERIFICATION -->
+<section class="panel">
+  <h3>02 / VERIFICATION RESULT</h3>
+
+  <div class="status" id="status" aria-live="polite">
+    Waiting for fairness data...
   </div>
 
-  <div class="panel">
-    <h3>FAIRNESS DATA</h3>
-
-    <label>Server Seed Hash</label>
-    <input id="hash" placeholder="64-character SHA-256 hash">
-
-    <label>Revealed Server Seed</label>
-    <input id="seed" placeholder="Enter revealed server seed">
-
-    <label>Client Seed (optional)</label>
-    <input id="client" placeholder="Enter client seed">
-
-    <label>Nonce (optional)</label>
-    <input id="nonce" type="number" min="0" placeholder="0">
-
-    <div class="buttons">
-      <button class="verify" id="verifyButton" onclick="verifyHash()">
-        VERIFY HASH
-      </button>
-      <button class="reset" onclick="resetAll()">RESET</button>
-    </div>
+  <div class="hash-output">
+    <strong>Calculated SHA-256:</strong>
+    <div id="calculated">Not calculated yet.</div>
   </div>
 
-  <div class="panel">
-    <h3>VERIFICATION STATUS</h3>
-    <div class="status" id="status">
-      Waiting for fairness data...
-    </div>
+  <button class="copy" id="copyButton"
+    type="button" style="width:100%;margin-top:12px">
+    COPY CALCULATED HASH
+  </button>
+</section>
 
-    <div class="result-hash">
-      <strong>Calculated SHA-256:</strong>
-      <div id="calculated">Not calculated yet.</div>
-    </div>
+<!-- PROBABILITY -->
+<section class="panel">
+  <h3>03 / PROBABILITY ANALYZER</h3>
 
-    <button class="copy" onclick="copyHash()" style="width:100%;margin-top:12px">
-      COPY CALCULATED HASH
-    </button>
+  <label for="bombs">Simulation Bomb Configuration</label>
+  <select id="bombs">
+    <option value="1">1 Bomb</option>
+    <option value="2">2 Bombs</option>
+    <option value="3">3 Bombs</option>
+    <option value="4">4 Bombs</option>
+    <option value="5" selected>5 Bombs</option>
+    <option value="6">6 Bombs</option>
+    <option value="7">7 Bombs</option>
+    <option value="8">8 Bombs</option>
+    <option value="9">9 Bombs</option>
+    <option value="10">10 Bombs</option>
+    <option value="11">11 Bombs</option>
+    <option value="12">12 Bombs</option>
+    <option value="13">13 Bombs</option>
+    <option value="14">14 Bombs</option>
+    <option value="15">15 Bombs</option>
+    <option value="16">16 Bombs</option>
+    <option value="17">17 Bombs</option>
+    <option value="18">18 Bombs</option>
+    <option value="19">19 Bombs</option>
+    <option value="20">20 Bombs</option>
+    <option value="21">21 Bombs</option>
+    <option value="22">22 Bombs</option>
+    <option value="23">23 Bombs</option>
+    <option value="24">24 Bombs</option>
+  </select>
+
+  <label for="picks">Number of Sequential Picks</label>
+  <input id="picks" type="number" min="1" max="25"
+    value="1">
+
+  <div class="metric">
+    <span>Bomb Probability (one cell)</span>
+    <strong id="bombChance">20%</strong>
   </div>
 
-  <div class="panel">
-    <h3>VERIFICATION HISTORY</h3>
-    <div id="history">No verification history yet.</div>
+  <div class="metric">
+    <span>Diamond Probability (one cell)</span>
+    <strong id="diamondChance">80%</strong>
   </div>
 
-  <div class="panel">
-    <h3>5 × 5 DEMONSTRATION GRID</h3>
-
-    <div class="stats">
-      <span>Selected Cells</span>
-      <span id="count">0 / 25</span>
-    </div>
-
-    <div class="grid" id="grid"></div>
-
-    <p style="color:#83a893;font-size:12px">
-      Interactive visual demonstration only.
-      This grid does not predict game outcomes.
-    </p>
+  <div class="metric">
+    <span>All Picks Safe Probability</span>
+    <strong id="safeChance">80%</strong>
   </div>
 
-  <div class="footer">
-    MINES FAIRNESS LAB • EDUCATIONAL DEMONSTRATION
+  <p class="note">
+    Theoretical probabilities assume a uniformly random board
+    with no replacement. They do not identify actual cell positions.
+  </p>
+</section>
+
+<!-- GRID -->
+<section class="panel">
+  <h3>04 / 5 × 5 DEMONSTRATION GRID</h3>
+
+  <div class="stats">
+    <span>Selected Cells</span>
+    <span id="count">0 / 25</span>
   </div>
+
+  <div class="grid" id="grid"></div>
+
+  <p class="note">
+    Blue diamonds and red bombs below are illustrative symbols only.
+    They are not calculated game outcomes or predictions.
+    Tap a cell to select or deselect it.
+  </p>
+</section>
+
+<!-- HISTORY -->
+<section class="panel">
+  <h3>05 / VERIFICATION HISTORY</h3>
+  <div id="history">No verification history yet.</div>
+</section>
+
+<div class="footer">
+  MINES FAIRNESS LAB V3 • EDUCATIONAL DEMONSTRATION
+</div>
+
 </div>
 
 <script>
-const grid = document.getElementById("grid");
-const count = document.getElementById("count");
-const statusBox = document.getElementById("status");
-const calculated = document.getElementById("calculated");
-const historyBox = document.getElementById("history");
+"use strict";
+
+const $ = id => document.getElementById(id);
+
+const grid = $("grid");
+const count = $("count");
+const statusBox = $("status");
+const calculated = $("calculated");
+const historyBox = $("history");
 
 let selected = new Set();
 let history = [];
@@ -233,21 +355,26 @@ function createGrid() {
 
   for (let i = 0; i < 25; i++) {
     const cell = document.createElement("button");
-    cell.className = "cell";
-    cell.type = "button";
-    cell.textContent = "◆";
-    cell.setAttribute("aria-label", "Cell " + (i + 1));
 
-    cell.onclick = () => {
+    cell.type = "button";
+    cell.className = "cell";
+    cell.textContent = "◆";
+    cell.setAttribute("aria-label", "Demonstration cell " + (i + 1));
+    cell.setAttribute("aria-pressed", "false");
+
+    cell.addEventListener("click", () => {
       if (selected.has(i)) {
         selected.delete(i);
         cell.classList.remove("active");
+        cell.setAttribute("aria-pressed", "false");
       } else {
         selected.add(i);
         cell.classList.add("active");
+        cell.setAttribute("aria-pressed", "true");
       }
+
       updateCount();
-    };
+    });
 
     grid.appendChild(cell);
   }
@@ -257,21 +384,10 @@ function updateCount() {
   count.textContent = selected.size + " / 25";
 }
 
-function addHistory(result, hash) {
-  history.unshift({
-    result,
-    hash,
-    time: new Date().toLocaleString("id-ID")
-  });
-
-  history = history.slice(0, 10);
-  renderHistory();
-}
-
 function renderHistory() {
   historyBox.innerHTML = "";
 
-  if (history.length === 0) {
+  if (!history.length) {
     historyBox.textContent = "No verification history yet.";
     return;
   }
@@ -294,10 +410,50 @@ function renderHistory() {
   });
 }
 
+function addHistory(result, hash) {
+  history.unshift({
+    result,
+    hash,
+    time: new Date().toLocaleString("id-ID")
+  });
+
+  history = history.slice(0, 10);
+  renderHistory();
+}
+
+function updateProbability() {
+  const bombs = Number($("bombs").value);
+  const picks = Number($("picks").value);
+
+  $("bombChance").textContent =
+    (bombs / 25 * 100).toFixed(2) + "%";
+
+  $("diamondChance").textContent =
+    ((25 - bombs) / 25 * 100).toFixed(2) + "%";
+
+  if (!Number.isInteger(picks) || picks < 1 || picks > 25) {
+    $("safeChance").textContent = "Invalid picks";
+    return;
+  }
+
+  let probability = 1;
+  const safeCells = 25 - bombs;
+
+  if (picks > safeCells) {
+    probability = 0;
+  } else {
+    for (let i = 0; i < picks; i++) {
+      probability *= (safeCells - i) / (25 - i);
+    }
+  }
+
+  $("safeChance").textContent =
+    (probability * 100).toFixed(4) + "%";
+}
+
 async function verifyHash() {
-  const seed = document.getElementById("seed").value;
-  const expected = document.getElementById("hash")
-    .value.trim().toLowerCase();
+  const seed = $("seed").value;
+  const expected = $("hash").value.trim().toLowerCase();
 
   lastCalculatedHash = "";
   calculated.textContent = "Not calculated yet.";
@@ -309,7 +465,7 @@ async function verifyHash() {
 
   if (!/^[a-f0-9]{64}$/.test(expected)) {
     statusBox.textContent =
-      "Invalid hash format. Enter exactly 64 hexadecimal characters.";
+      "INVALID: Hash must contain exactly 64 hexadecimal characters.";
     return;
   }
 
@@ -319,11 +475,11 @@ async function verifyHash() {
     return;
   }
 
-  const verifyButton = document.getElementById("verifyButton");
-  verifyButton.disabled = true;
+  const button = $("verifyButton");
+  button.disabled = true;
 
   try {
-    statusBox.textContent = "Verifying SHA-256...";
+    statusBox.textContent = "Calculating SHA-256...";
 
     const bytes = new TextEncoder().encode(seed);
     const digest = await crypto.subtle.digest("SHA-256", bytes);
@@ -337,56 +493,70 @@ async function verifyHash() {
 
     if (actual === expected) {
       statusBox.textContent =
-        "VERIFIED: SHA-256 hash matches the revealed server seed.";
+        "VERIFIED: Hash matches the revealed server seed.";
       addHistory("VERIFIED", actual);
     } else {
       statusBox.textContent =
-        "NOT VERIFIED: SHA-256 hash does not match.";
+        "NOT VERIFIED: Hash does not match the revealed server seed.";
       addHistory("NOT VERIFIED", actual);
     }
 
   } catch (error) {
-    statusBox.textContent = "Verification error.";
+    statusBox.textContent =
+      "ERROR: SHA-256 verification could not be completed.";
   } finally {
-    verifyButton.disabled = false;
+    button.disabled = false;
   }
 }
 
 async function copyHash() {
   if (!lastCalculatedHash) {
-    statusBox.textContent = "Calculate a hash before copying.";
+    statusBox.textContent =
+      "Please verify a seed before copying the calculated hash.";
     return;
   }
 
   try {
     await navigator.clipboard.writeText(lastCalculatedHash);
-    statusBox.textContent = "Calculated hash copied.";
+    statusBox.textContent = "Calculated hash copied successfully.";
   } catch (error) {
     statusBox.textContent =
-      "Copy unavailable. Please select and copy the hash manually.";
+      "Clipboard unavailable. Select and copy the hash manually.";
   }
 }
 
 function resetAll() {
-  document.getElementById("hash").value = "";
-  document.getElementById("seed").value = "";
-  document.getElementById("client").value = "";
-  document.getElementById("nonce").value = "";
+  $("hash").value = "";
+  $("seed").value = "";
+  $("client").value = "";
+  $("nonce").value = "";
+  $("bombs").value = "5";
+  $("picks").value = "1";
 
   selected.clear();
   history = [];
   lastCalculatedHash = "";
 
-  updateCount();
   createGrid();
+  updateCount();
+  updateProbability();
   renderHistory();
 
   calculated.textContent = "Not calculated yet.";
   statusBox.textContent = "Waiting for fairness data...";
 }
 
+$("verifyButton").addEventListener("click", verifyHash);
+$("resetButton").addEventListener("click", resetAll);
+$("copyButton").addEventListener("click", copyHash);
+$("bombs").addEventListener("change", updateProbability);
+$("picks").addEventListener("input", updateProbability);
+
 createGrid();
+updateCount();
+updateProbability();
 renderHistory();
 </script>
 </body>
-</html>
+  </html>
+  
